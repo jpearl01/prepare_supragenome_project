@@ -92,3 +92,9 @@ write_na_genes(files)
 write_aa_genes(files)
 write_contigs(files)
 create_fasta_inputs
+
+puts "Execute these commands on the output to do the all-against-all alignments (with my most recent parameter selection):"
+puts "genes against contigs"
+puts "/opt/fasta-36.3.5e/bin/fasta36 -E 1 -m 9 -n -Q -d 0 all_na_genes.fasta all_contigs.fasta"
+puts "na genes against aa genes"
+puts "/opt/fasta-36.3.5e/bin/tfasty36 -E 1 -m 9 -p -Q -d 0 all_aa_genes.fasta all_na_genes.fasta"
