@@ -32,7 +32,7 @@ def write_na_genes (file_list)
   file_list.each do |f|
     abort("Couldn't open the file #{f}") unless File.exists?(f)
     f_basename = File.basename(f, ".gbk")
-    outfile = File.open("na_genes/" + f_basename + ".fasta", 'w')
+    outfile = File.open("na_genes/" + f_basename + ".fna", 'w')
     bio_gbk = Bio::GenBank.open(f)
     count = 0
     bio_gbk.each do |e|
@@ -46,22 +46,49 @@ def write_na_genes (file_list)
   end
 end
 
-files = get_file_list
-
-write_na_genes(files)
-
 def write_aa_genes (file_list)
-
+  file_list.each do |f|
+    abort("Couldn't open the file #{f}") unless File.exists?(f)
+    f_basename = File.basename(f, ".gbk")
+    outfile = File.open("aa_genes/" + f_basename + ".faa", 'w')
+    bio_gbk = Bio::GenBank.open(f)
+    count = 0
+    bio_gbk.each do |e|
+      e.features.drop(1).each do |gene|
+        count += 1
+        na_seq = Bio::Sequence::NA.new(e.naseq.splicing(gene.position))
+        aa_seq = na_seq.translate
+        outfile.write(aa_seq.to_fasta(f_basename + "_" + count.to_s))
+      end     
+    end
+  end
 end
 
 def write_contigs (file_list)
-
+  file_list.each do |f|
+    abort("Couldn't open the file #{f}") unless File.exists?(f)
+    f_basename = File.basename(f, ".gbk")
+    outfile = File.open("contigs/" + f_basename + "_ctgs.fasta", 'w')
+    bio_gbk = Bio::GenBank.open(f)
+    count = 0
+    bio_gbk.each do |e|
+      ctg = e.features.first
+      count += 1
+      na_seq = Bio::Sequence::NA.new(e.naseq.splicing(ctg.position))
+      outfile.write(na_seq.to_fasta(f_basename + "ctg" + count.to_s))
+    end
+  end
 end
 
 def create_fasta_inputs
-
+  `cat na_genes/* > fasta_inputs/all_na_genes.fasta`
+  `cat aa_genes/* > fasta_inputs/all_aa_genes.fasta`
+  `cat contigs/* > fasta_inputs/all_contigs.fasta`
 end
 
-get_file_list.each do |f|
-  puts f
-end
+files = get_file_list
+
+write_na_genes(files)
+write_aa_genes(files)
+write_contigs(files)
+create_fasta_inputs
