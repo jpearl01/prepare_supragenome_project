@@ -85,7 +85,7 @@ def write_fasta_annotation (file_list)
       e.features.drop(1).each do |gene|
         count += 1
         na_seq = Bio::Sequence::NA.new(e.naseq.splicing(gene.position))
-        outfile.write(na_seq.to_fasta(f_basename + "_" + count.to_s + " product='\"" +gene.assoc['product'] + "'\" "))
+        outfile.write(na_seq.to_fasta(f_basename + "_" + count.to_s + " product='\"" +gene.assoc['product'] + "'\" " + "loc="+ gene.position))
       end     
     end
   end
@@ -98,12 +98,12 @@ def create_fasta_inputs
 end
 
 files = get_file_list
-
+=begin
 write_na_genes(files)
 write_aa_genes(files)
 write_contigs(files)
 create_fasta_inputs
-
+=end
 write_fasta_annotation(files)
 
 puts "Execute these commands on the output to do the all-against-all alignments (with my most recent parameter selection):"
