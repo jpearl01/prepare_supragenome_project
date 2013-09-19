@@ -15,17 +15,10 @@ Dir.mkdir('na_genes') unless File.exists?('na_genes')
 Dir.mkdir('aa_genes') unless File.exists?('aa_genes')
 Dir.mkdir('contigs')  unless File.exists?('contigs')
 Dir.mkdir('fasta_inputs') unless File.exists?('fasta_inputs')
+Dir.mkdir('fasta_with_annotations') unless File.exists?('fasta_with_annotations')
 
 def get_file_list
   Dir.glob('*.gbk')
-end
-
-def change_gene_names (bio_gbk, filename)
-
-end
-
-def change_contig_names (bio_gbk, filename)
-
 end
 
 def write_na_genes (file_list)
@@ -80,6 +73,24 @@ def write_contigs (file_list)
   end
 end
 
+#Need a function to write out fasta annotation files for use with my ca.rb program
+def write_fasta_annotation (file_list)
+  file_list.each do |f|
+    abort("Couldn't open the file #{f}") unless File.exists?(f)
+    f_basename = File.basename(f, ".gbk")
+    outfile = File.open("fasta_with_annotations/" + f_basename + ".fasta", 'w')
+    bio_gbk = Bio::GenBank.open(f)
+    count = 0
+    bio_gbk.each do |e|
+      e.features.drop(1).each do |gene|
+        count += 1
+        na_seq = Bio::Sequence::NA.new(e.naseq.splicing(gene.position))
+        outfile.write(na_seq.to_fasta(f_basename + "_" + count.to_s + " product='\"" +gene.assoc['product'] + "'\" "))
+      end     
+    end
+  end
+end
+
 def create_fasta_inputs
   `cat na_genes/* > fasta_inputs/all_na_genes.fasta`
   `cat aa_genes/* > fasta_inputs/all_aa_genes.fasta`
@@ -92,6 +103,8 @@ write_na_genes(files)
 write_aa_genes(files)
 write_contigs(files)
 create_fasta_inputs
+
+write_fasta_annotation(files)
 
 puts "Execute these commands on the output to do the all-against-all alignments (with my most recent parameter selection):"
 puts "genes against contigs"
