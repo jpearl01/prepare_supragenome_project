@@ -98,12 +98,10 @@ def create_fasta_inputs
 end
 
 files = get_file_list
-=begin
 write_na_genes(files)
 write_aa_genes(files)
 write_contigs(files)
 create_fasta_inputs
-=end
 write_fasta_annotation(files)
 
 puts "Execute these commands on the output to do the all-against-all alignments (with my most recent parameter selection):"
