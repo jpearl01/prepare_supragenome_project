@@ -85,7 +85,12 @@ def write_fasta_annotation (file_list)
       e.features.drop(1).each do |gene|
         count += 1
         na_seq = Bio::Sequence::NA.new(e.naseq.splicing(gene.position))
-        outfile.write(na_seq.to_fasta(f_basename + "_" + count.to_s + " product='\"" +gene.assoc['product'] + "'\" " + "loc="+ gene.position))
+        begin
+          next if gene.feature == "source"
+          outfile.write(na_seq.to_fasta(f_basename + "_" + count.to_s + " product='\"" +gene.assoc['product'] + "'\" " + "loc="+ gene.position))
+        rescue
+          puts "there was an issue with Genome #{f_basename} and gene #{count.to_s}"
+        end
       end     
     end
   end
