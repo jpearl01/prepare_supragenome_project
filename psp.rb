@@ -28,6 +28,7 @@ def write_na_genes (file_list)
     outfile = File.open("na_genes/" + f_basename + ".fna", 'w')
     bio_gbk = Bio::GenBank.open(f)
     count = 0
+    puts "#{f_basename} writing NA genes"
     bio_gbk.each do |e|
       e.features.drop(1).each do |gene|
         count += 1
@@ -46,6 +47,7 @@ def write_aa_genes (file_list)
     outfile = File.open("aa_genes/" + f_basename + ".faa", 'w')
     bio_gbk = Bio::GenBank.open(f)
     count = 0
+    puts "#{f_basename} writing AA genes"
     bio_gbk.each do |e|
       e.features.drop(1).each do |gene|
         count += 1
@@ -64,6 +66,7 @@ def write_contigs (file_list)
     outfile = File.open("contigs/" + f_basename + "_ctgs.fasta", 'w')
     bio_gbk = Bio::GenBank.open(f)
     count = 0
+    puts "#{f_basename} writing contigs"
     bio_gbk.each do |e|
       ctg = e.features.first
       count += 1
@@ -81,11 +84,18 @@ def write_fasta_annotation (file_list)
     outfile = File.open("fasta_with_annotations/" + f_basename + ".fasta", 'w')
     bio_gbk = Bio::GenBank.open(f)
     count = 0
+    puts "#{f_basename} writing fasta with annotation"
     bio_gbk.each do |e|
       e.features.drop(1).each do |gene|
         count += 1
         na_seq = Bio::Sequence::NA.new(e.naseq.splicing(gene.position))
-        outfile.write(na_seq.to_fasta(f_basename + "_" + count.to_s + " product='\"" +gene.assoc['product'] + "'\" " + "loc="+ gene.position))
+        begin
+          outfile.write(na_seq.to_fasta(f_basename + "_" + count.to_s + " product='\"" +gene.assoc['product'] + "'\" " + "loc="+ gene.position))
+        rescue
+          puts "could not write #{f_basename}"
+          puts "gene number " + count.to_s 
+          puts gene.assoc['product'] if gene.assoc['product'].exists?
+        end
       end     
     end
   end
