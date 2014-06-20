@@ -90,12 +90,12 @@ def write_fasta_annotation (file_list)
         count += 1
         na_seq = Bio::Sequence::NA.new(e.naseq.splicing(gene.position))
         begin
-          next if gene.feature == "source"
+          next if gene.feature == "source" || gene.feature == "gene"
           outfile.write(na_seq.to_fasta(f_basename + "_" + count.to_s + " product='\"" +gene.assoc['product'] + "'\" " + "loc="+ gene.position))
         rescue
           puts "could not write #{f_basename}"
           puts "gene number " + count.to_s 
-          puts gene.assoc['product'] if gene.assoc['product'].exists?
+          puts gene.assoc['product'] unless gene.assoc['product'].nil? #or gene.assoc['product'].exists?
         end
       end     
     end
