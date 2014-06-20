@@ -28,15 +28,17 @@ def write_na_genes (file_list)
     outfile = File.open("na_genes/" + f_basename + ".fna", 'w')
     bio_gbk = Bio::GenBank.open(f)
     count = 0
-    puts "#{f_basename} writing NA genes"
+    print "#{f_basename} writing NA genes... "
     bio_gbk.each do |e|
       e.features.drop(1).each do |gene|
+        next if gene.feature == 'gene'
         count += 1
         na_seq = Bio::Sequence::NA.new(e.naseq.splicing(gene.position))
         outfile.write(na_seq.to_fasta(f_basename + "_" + count.to_s))
       end
       
     end
+    puts "#{f_basename} wrote #{count} na genes"
   end
 end
 
@@ -47,15 +49,17 @@ def write_aa_genes (file_list)
     outfile = File.open("aa_genes/" + f_basename + ".faa", 'w')
     bio_gbk = Bio::GenBank.open(f)
     count = 0
-    puts "#{f_basename} writing AA genes"
+    print "#{f_basename} writing AA genes... "
     bio_gbk.each do |e|
       e.features.drop(1).each do |gene|
+        next if gene.feature == 'gene'
         count += 1
         na_seq = Bio::Sequence::NA.new(e.naseq.splicing(gene.position))
         aa_seq = na_seq.translate
         outfile.write(aa_seq.to_fasta(f_basename + "_" + count.to_s))
       end     
     end
+    puts "#{f_basename} wrote #{count} aa genes"
   end
 end
 
@@ -66,13 +70,14 @@ def write_contigs (file_list)
     outfile = File.open("contigs/" + f_basename + "_ctgs.fasta", 'w')
     bio_gbk = Bio::GenBank.open(f)
     count = 0
-    puts "#{f_basename} writing contigs"
+    print "#{f_basename} writing contigs... "
     bio_gbk.each do |e|
       ctg = e.features.first
       count += 1
       na_seq = Bio::Sequence::NA.new(e.naseq.splicing(ctg.position))
       outfile.write(na_seq.to_fasta(f_basename + "ctg" + count.to_s))
     end
+    puts "#{f_basename} wrote #{count} contigs"
   end
 end
 
@@ -84,13 +89,13 @@ def write_fasta_annotation (file_list)
     outfile = File.open("fasta_with_annotations/" + f_basename + ".fasta", 'w')
     bio_gbk = Bio::GenBank.open(f)
     count = 0
-    puts "#{f_basename} writing fasta with annotation"
+    print "#{f_basename} writing fasta with annotation..."
     bio_gbk.each do |e|
       e.features.drop(1).each do |gene|
-        count += 1
         na_seq = Bio::Sequence::NA.new(e.naseq.splicing(gene.position))
         begin
           next if gene.feature == "source" || gene.feature == "gene"
+          count += 1
           outfile.write(na_seq.to_fasta(f_basename + "_" + count.to_s + " product='\"" +gene.assoc['product'] + "'\" " + "loc="+ gene.position))
         rescue
           puts "could not write #{f_basename}"
@@ -99,6 +104,7 @@ def write_fasta_annotation (file_list)
         end
       end     
     end
+    puts "#{f_basename} wrote #{count} CDS"
   end
 end
 
