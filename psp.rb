@@ -30,8 +30,9 @@ def write_na_genes (file_list)
     count = 0
     print "#{f_basename} writing NA genes... "
     bio_gbk.each do |e|
+      #Need to drop the first record, as it is the entire contig
       e.features.drop(1).each do |gene|
-        next if gene.feature == 'gene'
+        next unless gene.feature == 'CDS'
         count += 1
         na_seq = Bio::Sequence::NA.new(e.naseq.splicing(gene.position))
         outfile.write(na_seq.to_fasta(f_basename + "_" + count.to_s))
@@ -52,7 +53,8 @@ def write_aa_genes (file_list)
     print "#{f_basename} writing AA genes... "
     bio_gbk.each do |e|
       e.features.drop(1).each do |gene|
-        next if gene.feature == 'gene'
+        #Only going to include CDS
+        next unless gene.feature == 'CDS'
         count += 1
         na_seq = Bio::Sequence::NA.new(e.naseq.splicing(gene.position))
         aa_seq = na_seq.translate
